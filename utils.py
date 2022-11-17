@@ -1,4 +1,5 @@
 from midiutil import MIDIFile
+from pyo import Metro, CosTable, TrigEnv, Iter, Sine
 import os
 
 def int_from_bits(bits):
@@ -20,8 +21,8 @@ def save_genome_to_midi(melody):
     track   = 0
     channel = 0
     time    = 0 # Eight beats into the composition
-    program = 40
-    mf.addProgramChange(track, channel, time, program)
+    program = 40 # Selecting instrument
+    mf.addProgramChange(track, channel, time, program) # Changing instrument from a fiven time at a given auido channel
 
     track = 0
     channel = 0

@@ -1,9 +1,10 @@
-from pyo import *
+from pyo import Server, Events, EventScale, EventSeq
 import time
 import random
 from utils import *
-from fitness_functions import *
-random.seed(1)
+from fitness_functions import direction_fitness, stability_fitness, entropy_fitness
+from genetic_functions import genetic_algorithm
+# random.seed(1)
 
 KEYS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F",
         "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]
@@ -25,28 +26,53 @@ scl = EventScale(root='C', scale='major', first=4)
 n_notes = 24
 num_notes = 4
 
+def listen_to_the_music(events):
+    m = metronome(128)
 
-def generate_notes(melody, scl, n_notes):
+    for e in events:
+        print(e)
+        e.play()
+    s.start()
+
+    time.sleep(5)
+
+    for e in events:
+        e.stop()
+    s.stop()
+
+def generate_notes(n_notes):
     notes = [[round(random.random()) for _ in range(4)]
              for _ in range(n_notes)]
-    print(notes)
+    return notes 
 
+def notes_to_chords(melody, notes, scl):
     notes_ind = [int_from_bits(note)for note in notes]
 
-    print(notes_ind)
-
     note_length = 4 / num_notes
-
+    a = 0
     for note in notes_ind:
+
+       
         if note > 14:
             melody["notes"] += [0]
             melody["velocity"] += [0]
             melody["beat"] += [note_length]
 
         else:
+            # Demonstration: You can make the note shorter (beat dec), or make it quieter (velocity dec)
+            # if a == 0:
+            #     melody["velocity"] += [127]
+            #     a = 1
+            #     melody["beat"] += [note_length]
+            # else:
+            #     melody["velocity"] += [30]
+            #     a = 0
+            #     melody["beat"] += [note_length/2]
+
             melody["notes"] += [note]
             melody["velocity"] += [127]
             melody["beat"] += [note_length]
+        
 
     steps = []
     for step in range(1):
@@ -55,18 +81,14 @@ def generate_notes(melody, scl, n_notes):
     melody["notes"] = steps
 
     save_genome_to_midi(melody)
-
     return melody
 
 
-def generate_music(melody, scl, n_notes):
-    melody = generate_notes(melody, scl, n_notes)
+def generate_music(melody, scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut):
 
-    # melody["notes"] = [scl[note] for note in melody["notes"]]
+    best_notes, score = genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut)
 
-    print(melody)
-
-    print(direction_fitness(melody))
+    notes_to_chords(melody, best_notes, scl)
 
     return [
         Events(
@@ -82,19 +104,12 @@ def generate_music(melody, scl, n_notes):
     ]
 
 
-events = generate_music(melody, scl, n_notes)
-print(events)
-# m = metronome(128)
+# direction_fitness, stability_fitness, entropy_fitness
+fitness= entropy_fitness
+n_iter = 100
+n_pop = 100
+r_cross = 0.2
+r_mut = 0.05
+events = generate_music(melody, scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut)
 
-# for e in events:
-#     print(e)
-#     e.play()
-#     # time.sleep(1)
-#     # e.stop()
-# s.start()
-
-# # time.sleep(5)
-
-# for e in events:
-#     e.stop()
-# s.stop()
+# listen_to_the_music(events)

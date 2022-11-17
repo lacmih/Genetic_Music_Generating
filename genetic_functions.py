@@ -1,8 +1,10 @@
 from numpy.random import randint
 from numpy.random import rand
-
 from fitness_functions import direction_fitness
 
+from utils import int_from_bits
+from numpy import random
+# random.seed(1)
 
 def random_gene():
     s = [round(rand()) for _ in range(4)]
@@ -52,17 +54,20 @@ def selection(pop, scores, k=3):
 def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
     # initial population of random bitstring
     pop = [random_element() for _ in range(n_pop)]
+
+    pop_int = [[int_from_bits(note) for note in pop_elem] for pop_elem in pop]# For the fitness calculation, we need the exact numbers
+
     # keep track of best solution
-    best, best_eval = 0, fitness(pop[0])
+    best, best_eval = 0.0, 0.0
     # enumerate generations
     for gen in range(n_iter):
         # evaluate all candidates in the population
-        scores = [fitness(c) for c in pop]
+        scores = [fitness(c) for c in pop_int]
         # check for new best solution
         for i in range(n_pop):
-            if scores[i] < best_eval:
+            if scores[i] > best_eval:
                 best, best_eval = pop[i], scores[i]
-                print(">%d, new best f(%s) = %.3f" % (gen,  pop[i], scores[i]))
+                # print(">%d, new best f(%s) = %.3f" % (gen,  pop[i], scores[i]))
         # select parents
         selected = [selection(pop, scores) for _ in range(n_pop)]
         # create the next generation
@@ -78,6 +83,7 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
                 children.append(c)
         # replace population
         pop = children
+        pop_int = [[int_from_bits(note) for note in pop_elem] for pop_elem in pop]
     return [best, best_eval]
 
 
@@ -88,7 +94,10 @@ def fitness(elem):
         f += s
     return f
 
+def main():
+    best, score = genetic_algorithm(direction_fitness, 100, 100, 0.2, 0.05)
+    print('Done!')
+    print('f(%s) = %f' % (best, score))
 
-best, score = genetic_algorithm(direction_fitness, 100, 100, 0, 0.5)
-print('Done!')
-print('f(%s) = %f' % (best, score))
+if __name__ == "__main__":
+    main()
