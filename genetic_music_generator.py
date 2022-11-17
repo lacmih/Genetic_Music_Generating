@@ -5,8 +5,10 @@ from utils import *
 from fitness_functions import *
 random.seed(1)
 
-KEYS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]
-SCALES = ["major", "minorM", "dorian", "phrygian", "lydian", "mixolydian", "majorBlues", "minorBlues"]
+KEYS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F",
+        "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]
+SCALES = ["major", "minorM", "dorian", "phrygian",
+          "lydian", "mixolydian", "majorBlues", "minorBlues"]
 BITS_PER_NOTE = 4
 # INSTRUMENTS = ["prophet", "dsaw", "fm", "tb303", "pulse", "piano", "blade", "beep"]
 
@@ -15,22 +17,23 @@ s.setOutputDevice(16)
 s.boot()
 
 melody = {
-        "notes": [],
-        "velocity": [],
-        "beat": []
-    }
+    "notes": [],
+    "velocity": [],
+    "beat": []
+}
 scl = EventScale(root='C', scale='major', first=4)
 n_notes = 24
 num_notes = 4
 
+
 def generate_notes(melody, scl, n_notes):
-    notes = [[round(random.random()) for _ in range(4)] for _ in range(n_notes)]
+    notes = [[round(random.random()) for _ in range(4)]
+             for _ in range(n_notes)]
     print(notes)
 
     notes_ind = [int_from_bits(note)for note in notes]
 
     print(notes_ind)
-
 
     note_length = 4 / num_notes
 
@@ -39,7 +42,7 @@ def generate_notes(melody, scl, n_notes):
             melody["notes"] += [0]
             melody["velocity"] += [0]
             melody["beat"] += [note_length]
-        
+
         else:
             melody["notes"] += [note]
             melody["velocity"] += [127]
@@ -54,6 +57,7 @@ def generate_notes(melody, scl, n_notes):
     save_genome_to_midi(melody)
 
     return melody
+
 
 def generate_music(melody, scl, n_notes):
     melody = generate_notes(melody, scl, n_notes)
@@ -79,7 +83,7 @@ def generate_music(melody, scl, n_notes):
 
 
 events = generate_music(melody, scl, n_notes)
-
+print(events)
 # m = metronome(128)
 
 # for e in events:
