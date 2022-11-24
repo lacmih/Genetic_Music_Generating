@@ -78,18 +78,18 @@ def generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instr
 
     save_genome_to_midi(melodies)
 
-    return [
-        Events(
-            midinote=EventSeq(step, occurrences=1),
-            midivel=EventSeq(melody["velocity"], occurrences=1),
-            beat=EventSeq(melody["beat"], occurrences=1),
-            # attack=0.001,
-            # decay=0.05,
-            # sustain=0.5,
-            # release=0.005,
-            # bpm = 128
-        ) for step in melody["notes"]
-    ]
+    # return [
+    #     Events(
+    #         midinote=EventSeq(step, occurrences=1),
+    #         midivel=EventSeq(melody["velocity"], occurrences=1),
+    #         beat=EventSeq(melody["beat"], occurrences=1),
+    #         # attack=0.001,
+    #         # decay=0.05,
+    #         # sustain=0.5,
+    #         # release=0.005,
+    #         # bpm = 128
+    #     ) for step in melody["notes"]
+    # ]
 
 
 # direction_fitness, stability_fitness, entropy_fitness
@@ -99,8 +99,8 @@ n_pop = 100
 r_cross = 0.2
 r_mut = 0.05
 n_instruments = 2
-events = generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments)
-
+# events = generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments)
+generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments)
 # listen_to_the_music(events)
 
 # Általánosítani kellene: Hogy melyik hang melyik időben érkezik (adott hangszeren ha egyszerre több hangot (pl akkordot)
