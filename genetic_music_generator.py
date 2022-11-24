@@ -22,6 +22,13 @@ melody = {
     "velocity": [],
     "beat": []
 }
+
+melody2 = {
+    "notes": [],
+    "velocity": [],
+    "beat": []
+}
+
 scl = EventScale(root='C', scale='major', first=4)
 n_notes = 24
 num_notes = 4
@@ -80,15 +87,22 @@ def notes_to_chords(melody, notes, scl):
 
     melody["notes"] = steps
 
-    save_genome_to_midi(melody)
     return melody
 
 
-def generate_music(melody, scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut):
+def generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut):
+
+    global melody, melody2
 
     best_notes, score = genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut)
 
-    notes_to_chords(melody, best_notes, scl)
+    melody = notes_to_chords(melody, best_notes, scl)
+
+    best_notes2, score2 = genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut)
+
+    melody2 = notes_to_chords(melody2, best_notes2, scl)
+
+    save_genome_to_midi(melody, melody2)
 
     return [
         Events(
@@ -110,6 +124,6 @@ n_iter = 100
 n_pop = 100
 r_cross = 0.2
 r_mut = 0.05
-events = generate_music(melody, scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut)
+events = generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut)
 
 # listen_to_the_music(events)

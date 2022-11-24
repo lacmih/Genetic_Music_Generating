@@ -12,7 +12,7 @@ def metronome(bpm: int):
     freq = Iter(met, choice=[660, 440, 440, 440])
     return Sine(freq=freq, mul=amp).mix(2).out()
 
-def save_genome_to_midi(melody):
+def save_genome_to_midi(melody, melody2):
     if len(melody["notes"][0]) != len(melody["beat"]) or len(melody["notes"][0]) != len(melody["velocity"]):
         raise ValueError
 
@@ -38,6 +38,21 @@ def save_genome_to_midi(melody):
                 mf.addNote(track, channel, step[i], time, melody["beat"][i], vel)
 
         time += melody["beat"][i]
+    
+    track   = 0
+    channel = 1
+    time    = 0 # Eight beats into the composition
+    program = 1 # Selecting instrument
+    mf.addProgramChange(track, channel, time, program) # Changing instrument from a fiven time at a given auido channel
+
+    channel = 1
+    bpm = 120
+    for i, vel in enumerate(melody2["velocity"]):
+        if vel > 0:
+            for step in melody2["notes"]:
+                mf.addNote(track, channel, step[i], time, melody2["beat"][i], vel)
+
+        time += melody2["beat"][i]
 
     filename = "./generated_music/music_3.mid"
 
