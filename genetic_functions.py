@@ -1,9 +1,11 @@
 from numpy.random import randint
 from numpy.random import rand
-from fitness_functions import direction_fitness
+from fitness_functions import direction_fitness, stability_fitness, entropy_fitness
 
 from utils import int_from_bits
 from numpy import random
+import numpy as np
+
 # random.seed(1)
 
 def random_gene():
@@ -62,7 +64,15 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
     # enumerate generations
     for gen in range(n_iter):
         # evaluate all candidates in the population
-        scores = [fitness(c) for c in pop_int]
+
+        scores = [np.array([fit_func(c) for c in pop_int]) for fit_func in fitness]
+        sc = np.zeros(len(pop_int))
+
+        for i in scores:
+            sc += i
+        
+        scores = sc
+
         # check for new best solution
         for i in range(n_pop):
             if scores[i] > best_eval:
@@ -95,7 +105,7 @@ def fitness(elem):
     return f
 
 def main():
-    best, score = genetic_algorithm(direction_fitness, 100, 100, 0.2, 0.05)
+    best, score = genetic_algorithm([entropy_fitness], 2, 100, 0.2, 0.05)
     print('Done!')
     print('f(%s) = %f' % (best, score))
 

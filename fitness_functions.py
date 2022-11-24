@@ -38,7 +38,6 @@ def direction_fitness(melody_notes):
 def stability_fitness(melody_notes):
     prev = melody_notes[0]
 
-    # print(melody_notes[0])
     dir = 1
     n_act = 0
     n_change_dir = 0
@@ -70,6 +69,6 @@ def entropy_fitness(melody_notes):
     l = len(melody_notes)
     probs = [p/l for p in probs]
 
-    return(entropy(probs))
+    return(entropy(probs, base = len(probs)))
 
 

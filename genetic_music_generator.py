@@ -34,7 +34,7 @@ def listen_to_the_music(events):
         e.play()
     s.start()
 
-    time.sleep(5)
+    time.sleep(10)
 
     for e in events:
         e.stop()
@@ -60,18 +60,18 @@ def notes_to_chords(melody, notes, scl):
 
         else:
             # Demonstration: You can make the note shorter (beat dec), or make it quieter (velocity dec)
-            # if a == 0:
-            #     melody["velocity"] += [127]
-            #     a = 1
-            #     melody["beat"] += [note_length]
-            # else:
-            #     melody["velocity"] += [30]
-            #     a = 0
-            #     melody["beat"] += [note_length/2]
+            if a == 0:
+                melody["velocity"] += [127]
+                a = 1
+                melody["beat"] += [note_length]
+            else:
+                melody["velocity"] += [60]
+                a = 0
+                melody["beat"] += [note_length/2]
 
             melody["notes"] += [note]
-            melody["velocity"] += [127]
-            melody["beat"] += [note_length]
+            # melody["velocity"] += [127]
+            # melody["beat"] += [note_length]
         
 
     steps = []
@@ -105,7 +105,7 @@ def generate_music(melody, scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut)
 
 
 # direction_fitness, stability_fitness, entropy_fitness
-fitness= entropy_fitness
+fitness = [direction_fitness, stability_fitness, entropy_fitness]
 n_iter = 100
 n_pop = 100
 r_cross = 0.2

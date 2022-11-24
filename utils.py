@@ -39,7 +39,7 @@ def save_genome_to_midi(melody):
 
         time += melody["beat"][i]
 
-    filename = "./generated_music/music_2.mid"
+    filename = "./generated_music/music_3.mid"
 
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "wb") as f:
