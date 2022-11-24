@@ -17,18 +17,6 @@ s = Server()
 s.setOutputDevice(16)
 s.boot()
 
-melody = {
-    "notes": [],
-    "velocity": [],
-    "beat": []
-}
-
-melody2 = {
-    "notes": [],
-    "velocity": [],
-    "beat": []
-}
-
 scl = EventScale(root='C', scale='major', first=4)
 n_notes = 24
 num_notes = 4
@@ -65,24 +53,10 @@ def notes_to_chords(melody, notes, beats, scl):
             melody["beat"] += [note_length]
 
         else:
-            # Demonstration: You can make the note shorter (beat dec), or make it quieter (velocity dec)
-            # if a == 0:
-            #     melody["velocity"] += [127]
-            #     a = 1
-            #     melody["beat"] += [note_length]
-            # else:
-            #     melody["velocity"] += [63]
-            #     a = 0
-            #     melody["beat"] += [note_length/2]
-            #     melody["velocity"] += [63]
-            #     melody["beat"] += [note_length/2]
-            #     melody["notes"] += [note].
-            
+            # You can make the note shorter (beat dec), or make it quieter (velocity dec)
             melody["beat"] += [note_length * beats[e]] # the beats array element scales the normal beat length
             melody["notes"] += [note]
             melody["velocity"] += [127]
-            # melody["beat"] += [note_length]
-        
 
     steps = []
     for step in range(1):
@@ -124,11 +98,14 @@ n_iter = 100
 n_pop = 100
 r_cross = 0.2
 r_mut = 0.05
-n_instruments = 4
+n_instruments = 2
 events = generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments)
 
 # listen_to_the_music(events)
 
 # Általánosítani kellene: Hogy melyik hang melyik időben érkezik (adott hangszeren ha egyszerre több hangot (pl akkordot)
 # akarunk játszani; time tömb. Utilsba használni. Általánosítani a módszert n hangszerre, a fitness 
-# függvények tudják ezt kezelni). A tempó is random generálódjon a hangokra
+# függvények tudják ezt kezelni). -> Tehát általánosítani a genetikus algoritmust a fitness függvényekkel együtt 
+# több hangszerre
+# Behúzni egy hálót, mint fitness függvényt, amelyik a stílusra vonatkozik
+

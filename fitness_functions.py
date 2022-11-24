@@ -71,4 +71,8 @@ def entropy_fitness(melody_notes):
 
     return(entropy(probs, base = len(probs)))
 
+# Adott hangszerre megnézi, hogy az egyidőben leadott hangok hány százaléka akkord
+def chords_fitness(melodies):
+    pass
+
 
