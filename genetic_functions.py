@@ -16,6 +16,12 @@ def random_gene():
 def random_element(k=100):
     return [random_gene() for _ in range(k)]
 
+def random_velocity(k=100):
+    return [random.choice([127, 63, 31]) for _ in range(k)]
+
+def random_beat(k=100):
+    return [random.choice([1, 1/2, 1/4]) for _ in range(k)]
+
 
 def mutation(elem, c):
     # iterate over the population and mutate with a chance of c
@@ -94,7 +100,7 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
         # replace population
         pop = children
         pop_int = [[int_from_bits(note) for note in pop_elem] for pop_elem in pop]
-    return [best, best_eval]
+    return [best, best_eval, random_beat()]
 
 
 def fitness(elem):

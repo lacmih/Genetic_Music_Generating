@@ -52,13 +52,12 @@ def generate_notes(n_notes):
              for _ in range(n_notes)]
     return notes 
 
-def notes_to_chords(melody, notes, scl):
+def notes_to_chords(melody, notes, beats, scl):
     notes_ind = [int_from_bits(note)for note in notes]
 
     note_length = 4 / num_notes
     a = 0
-    for note in notes_ind:
-
+    for e, note in enumerate(notes_ind):
        
         if note > 14:
             melody["notes"] += [0]
@@ -67,17 +66,21 @@ def notes_to_chords(melody, notes, scl):
 
         else:
             # Demonstration: You can make the note shorter (beat dec), or make it quieter (velocity dec)
-            if a == 0:
-                melody["velocity"] += [127]
-                a = 1
-                melody["beat"] += [note_length]
-            else:
-                melody["velocity"] += [60]
-                a = 0
-                melody["beat"] += [note_length/2]
-
+            # if a == 0:
+            #     melody["velocity"] += [127]
+            #     a = 1
+            #     melody["beat"] += [note_length]
+            # else:
+            #     melody["velocity"] += [63]
+            #     a = 0
+            #     melody["beat"] += [note_length/2]
+            #     melody["velocity"] += [63]
+            #     melody["beat"] += [note_length/2]
+            #     melody["notes"] += [note].
+            
+            melody["beat"] += [note_length * beats[e]] # the beats array element scales the normal beat length
             melody["notes"] += [note]
-            # melody["velocity"] += [127]
+            melody["velocity"] += [127]
             # melody["beat"] += [note_length]
         
 
@@ -90,19 +93,16 @@ def notes_to_chords(melody, notes, scl):
     return melody
 
 
-def generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut):
+def generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments):
 
-    global melody, melody2
+    melodies = [{ "notes": [], "velocity": [], "beat": [] } for i in range(n_instruments)]
 
-    best_notes, score = genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut)
+    for i in range(n_instruments):
+        best_notes, score, best_beats = genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut)
 
-    melody = notes_to_chords(melody, best_notes, scl)
+        melodies[i] = notes_to_chords(melodies[i], best_notes, best_beats, scl)
 
-    best_notes2, score2 = genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut)
-
-    melody2 = notes_to_chords(melody2, best_notes2, scl)
-
-    save_genome_to_midi(melody, melody2)
+    save_genome_to_midi(melodies)
 
     return [
         Events(
@@ -124,6 +124,11 @@ n_iter = 100
 n_pop = 100
 r_cross = 0.2
 r_mut = 0.05
-events = generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut)
+n_instruments = 4
+events = generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments)
 
 # listen_to_the_music(events)
+
+# Általánosítani kellene: Hogy melyik hang melyik időben érkezik (adott hangszeren ha egyszerre több hangot (pl akkordot)
+# akarunk játszani; time tömb. Utilsba használni. Általánosítani a módszert n hangszerre, a fitness 
+# függvények tudják ezt kezelni). A tempó is random generálódjon a hangokra
