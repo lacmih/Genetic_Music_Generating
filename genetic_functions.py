@@ -4,6 +4,7 @@ from fitness_functions import direction_fitness, stability_fitness, entropy_fitn
 
 from utils import int_from_bits
 from numpy import random
+
 import numpy as np
 
 # random.seed(1)
@@ -20,7 +21,7 @@ def random_velocity(k=100):
     return [random.choice([127, 63, 31]) for _ in range(k)]
 
 def random_beat(k=100):
-    return [random.choice([1, 1/2, 1/4]) for _ in range(k)]
+    return [random.choice([1]) for _ in range(k)]
 
 
 def mutation(elem, c):
@@ -69,6 +70,8 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
     best, best_eval = 0.0, 0.0
     # enumerate generations
     for gen in range(n_iter):
+        # if gen % 100 == 0:
+        print("Generation number: " + str(gen), end='\r')
         # evaluate all candidates in the population
 
         scores = [np.array([fit_func(c) for c in pop_int]) for fit_func in fitness]

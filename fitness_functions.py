@@ -1,9 +1,52 @@
 from scipy.stats import entropy
+from utils import predict, save_genome_to_midi
+from midi2audio import FluidSynth
+from joblib import load
+# from genetic_music_generator import notes_to_chords
+# from genetic_functions import random_beat
+from pyo import EventScale
+from numpy import random
+from utils import int_from_bits
+
+
+labels = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
+model = load('./genre-classifier/xgb.joblib')
 
 # Defining different functions, that add up the fitness value
 
 # Subraters from paper Apply evolutionary algorithms for music generation
 # url: https://odr.chalmers.se/server/api/core/bitstreams/2a2d8e3b-d16f-4d4d-8edd-ecdd599f1bfd/content
+
+def notes_to_chords(melody, notes, beats, scl):
+    notes_ind = notes
+    num_notes = 4
+
+    note_length = 4 / num_notes
+    a = 0
+    for e, note in enumerate(notes_ind):
+       
+        if note > 14:
+            melody["notes"] += [0]
+            melody["velocity"] += [0]
+            melody["beat"] += [note_length]
+
+        else:
+            # You can make the note shorter (beat dec), or make it quieter (velocity dec)
+            melody["beat"] += [note_length * beats[e]] # the beats array element scales the normal beat length
+            melody["notes"] += [note]
+            melody["velocity"] += [127]
+
+    steps = []
+    for step in range(1):
+        steps.append([scl[note % len(scl)] for note in melody["notes"]])
+
+    melody["notes"] = steps
+
+    return melody
+
+def random_beat(k=100):
+    return [random.choice([1]) for _ in range(k)]
+
 
 # Direction of melody:
 def direction_fitness(melody_notes):
@@ -74,5 +117,28 @@ def entropy_fitness(melody_notes):
 # Adott hangszerre megnézi, hogy az egyidőben leadott hangok hány százaléka akkord
 def chords_fitness(melodies):
     pass
+
+def style_fitness(melodies):
+    global labels, model
+    style = 'classical'
+
+    print(melodies)
+
+    melody = { "notes": [], "velocity": [], "beat": [] }
+    scl = EventScale(root='C', scale='major', first=4)
+    melody = notes_to_chords(melody, melodies, random_beat(), scl)
+    save_genome_to_midi([melody])
+
+    FluidSynth().midi_to_audio('./generated_music/music_act.mid', './generated_music/music_act.wav')
+    
+    ii = 0
+    for p, i in enumerate(labels):
+        if style == i:
+            ii = p
+            break
+
+    label, proc, probs = predict('./generated_music/music_act.wav', model)
+    return probs[ii]
+    
 
 

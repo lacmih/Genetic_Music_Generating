@@ -2,7 +2,7 @@ from pyo import Server, Events, EventScale, EventSeq
 import time
 import random
 from utils import *
-from fitness_functions import direction_fitness, stability_fitness, entropy_fitness
+from fitness_functions import direction_fitness, stability_fitness, entropy_fitness, style_fitness
 from genetic_functions import genetic_algorithm
 # random.seed(1)
 
@@ -93,10 +93,10 @@ def generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instr
 
 
 # direction_fitness, stability_fitness, entropy_fitness
-fitness = [direction_fitness, stability_fitness, entropy_fitness]
-n_iter = 100
-n_pop = 100
-r_cross = 0.2
+fitness = [direction_fitness, stability_fitness, entropy_fitness, style_fitness]
+n_iter = 5
+n_pop = 6
+r_cross = 0.7
 r_mut = 0.05
 n_instruments = 2
 # events = generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments)
