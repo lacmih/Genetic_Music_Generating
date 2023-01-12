@@ -1,12 +1,19 @@
 import os
 import numpy as np
+import librosa
 
 from midiutil import MIDIFile
 from pyo import Metro, CosTable, TrigEnv, Iter, Sine
-import librosa
+from itertools import pairwise
 
 def int_from_bits(bits):
     return int(sum([bit*pow(2, index) for index, bit in enumerate(bits)]))
+
+def triplewise(iterable):
+    "Return overlapping triplets from an iterable"
+    # triplewise('ABCDEFG') --> ABC BCD CDE DEF EFG
+    for (a, _), (b, c) in pairwise(pairwise(iterable)):
+        yield a, b, c
 
 def metronome(bpm: int):
     met = Metro(time=1 / (bpm / 60.0)).play()
@@ -20,16 +27,20 @@ def save_genome_to_midi(melodies):
         if len(melody["notes"][0]) != len(melody["beat"]) or len(melody["notes"][0]) != len(melody["velocity"]):
             raise ValueError
 
+    
     mf = MIDIFile(1)
 
     time = 0.0
     track = 0
     bpm = 120
-    prog = [40, 0, 60, 69]
+    prog = [0, 40, 60, 69]
     mf.addTrackName(track, time, "Sample Track")
     mf.addTempo(track, time, bpm)
 
     for ind, melody in enumerate(melodies):
+        # print(melody["beat"])
+        # print(len(melody["beat"]))
+        # print(len(melody["velocity"]))
         channel = ind
         program = prog[ind] # Selecting instrument
         mf.addProgramChange(track, channel, time, program) # Changing instrument from a fiven time at a given auido channel
@@ -39,7 +50,7 @@ def save_genome_to_midi(melodies):
                 for step in melody["notes"]:
                     mf.addNote(track, channel, step[i], time, melody["beat"][i], vel)
 
-            time += melody["beat"][i]
+            time += melody["time"][i]
 
         time = 0.0
 

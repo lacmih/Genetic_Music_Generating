@@ -6,7 +6,7 @@ from joblib import load
 # from genetic_functions import random_beat
 from pyo import EventScale
 from numpy import random
-from utils import int_from_bits
+from utils import int_from_bits, triplewise
 
 
 labels = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
@@ -100,7 +100,6 @@ def stability_fitness(melody_notes):
         prev = i
     return 1 - (n_change_dir / len(melody_notes))
 
-
 def entropy_fitness(melody_notes):
     
     # Notes into a Probability Distribution Function
@@ -114,15 +113,24 @@ def entropy_fitness(melody_notes):
 
     return(entropy(probs, base = len(probs)))
 
-# Adott hangszerre megnézi, hogy az egyidőben leadott hangok hány százaléka akkord
-def chords_fitness(melodies):
-    pass
+# Adott hangszerre megnézi, hogy az egymást követően leadott 3-hangok hány százaléka akkord
+def chords_fitness(melody_notes):
+
+    acc = 0
+    for i in triplewise(melody_notes):
+        if (i[0] != 14) and (i[2] != 14) and \
+            ((i[0] - i[1] == 2 and i[1] - i[2] == 2) or \
+            (i[2] - i[1] == 2 and i[1] - i[0] == 2)):
+            acc += 1
+    # print(acc/(len(melody_notes)/3))
+    return (acc/(len(melody_notes)/3))
+    
 
 def style_fitness(melodies):
     global labels, model
     style = 'classical'
 
-    print(melodies)
+    # print(melodies)
 
     melody = { "notes": [], "velocity": [], "beat": [] }
     scl = EventScale(root='C', scale='major', first=4)

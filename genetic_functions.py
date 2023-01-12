@@ -1,6 +1,6 @@
 from numpy.random import randint
 from numpy.random import rand
-from fitness_functions import direction_fitness, stability_fitness, entropy_fitness
+from fitness_functions import direction_fitness, stability_fitness, entropy_fitness, chords_fitness
 
 from utils import int_from_bits
 from numpy import random
@@ -13,9 +13,17 @@ def random_gene():
     s = [round(rand()) for _ in range(4)]
     return s
 
-
 def random_element(k=100):
     return [random_gene() for _ in range(k)]
+
+def random_chord(k=100):
+    ch = [0]
+    for i in range(round(k/3)):
+        random = round(rand() * 12)
+        ch.append(random)
+        ch.append(random + 2)
+        ch.append(random + 4)
+    return ch
 
 def random_velocity(k=100):
     return [random.choice([127, 63, 31]) for _ in range(k)]
@@ -23,12 +31,23 @@ def random_velocity(k=100):
 def random_beat(k=100):
     return [random.choice([1]) for _ in range(k)]
 
+def random_time(k=100):
+    return [random.choice([0, 1]) for _ in range(k)]
 
 def mutation(elem, c):
     # iterate over the population and mutate with a chance of c
     mute = rand()
     if mute > c:
         e = random_gene()
+        pos = randint(0, len(elem) - 1)
+        elem[pos] = e
+    return elem
+
+def mutation_chord(elem, c):
+    # iterate over the population and mutate with a chance of c
+    mute = rand()
+    if mute > c:
+        e = round(rand() * 16)
         pos = randint(0, len(elem) - 1)
         elem[pos] = e
     return elem
@@ -104,6 +123,99 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
         pop = children
         pop_int = [[int_from_bits(note) for note in pop_elem] for pop_elem in pop]
     return [best, best_eval, random_beat()]
+
+
+def genetic_algorithm_accorded(fitness, n_iter, n_pop, r_cross, r_mut):
+    # initial population of random bitstring
+
+    fitness.append(chords_fitness)
+
+    pop = [random_element() for _ in range(n_pop)]
+
+    pop_int = [[int_from_bits(note) for note in pop_elem] for pop_elem in pop]# For the fitness calculation, we need the exact numbers
+
+    # keep track of best solution
+    best, best_eval = 0.0, 0.0
+    # enumerate generations
+    for gen in range(n_iter):
+        # if gen % 100 == 0:
+        print("Generation number: " + str(gen), end='\r')
+        # evaluate all candidates in the population
+
+        scores = [np.array([fit_func(c) for c in pop_int]) for fit_func in fitness]
+        # print("Chords fitness: ", scores[len(scores) - 1])
+        sc = np.zeros(len(pop_int))
+
+        for i in scores:
+            sc += i
+        
+        scores = sc
+
+        # check for new best solution
+        for i in range(n_pop):
+            if scores[i] > best_eval:
+                best, best_eval = pop[i], scores[i]
+                # print(">%d, new best f(%s) = %.3f" % (gen,  pop[i], scores[i]))
+        # select parents
+        selected = [selection(pop, scores) for _ in range(n_pop)]
+        # create the next generation
+        children = list()
+        for i in range(0, n_pop, 2):
+            # get selected parents in pairs
+            p1, p2 = selected[i], selected[i+1]
+            # crossover and mutation
+            for c in crossover(p1, p2, r_cross):
+                # mutation
+                mutation(c, r_mut)
+                # store for next generation
+                children.append(c)
+        # replace population
+        pop = children
+        pop_int = [[int_from_bits(note) for note in pop_elem] for pop_elem in pop]
+    return [best, best_eval, random_beat()]
+
+def genetic_algorithm_accorded_fully(fitness, n_iter, n_pop, r_cross, r_mut):
+    # initial population of random bitstring
+
+    fitness.append(chords_fitness)
+    k = 199
+
+    pop_int = [random_chord(k) for _ in range(n_pop)]
+    pop = pop_int.copy()
+
+    # keep track of best solution
+    best, best_eval = 0.0, 0.0
+    # enumerate generations
+    for gen in range(1):
+        # if gen % 100 == 0:
+        print("Generation number: " + str(gen), end='\r')
+        # evaluate all candidates in the population
+
+        scores = [np.array([fit_func(c) for c in pop_int]) for fit_func in fitness]
+        sc = np.zeros(len(pop_int))
+
+        for i in scores:
+            sc += i
+        scores = sc
+
+        # check for new best solution
+        for i in range(n_pop):
+            if scores[i] > best_eval:
+                best, best_eval = pop[i], scores[i]
+
+        # select parents
+        selected = [selection(pop, scores) for _ in range(n_pop)]
+        # create the next generation
+        children = list()
+        for i in range(0, n_pop, 2):
+            p1, p2 = selected[i], selected[i+1]
+            for c in crossover(p1, p2, r_cross):
+                mutation_chord(c, r_mut)
+                children.append(c)
+
+        pop = children
+        pop_int = [random_chord(k) for _ in range(n_pop)]
+    return [best, best_eval, random_beat(k)]
 
 
 def fitness(elem):
