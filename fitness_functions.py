@@ -115,7 +115,6 @@ def entropy_fitness(melody_notes):
 
 # Adott hangszerre megnézi, hogy az egymást követően leadott 3-hangok hány százaléka akkord
 def chords_fitness(melody_notes):
-
     acc = 0
     for i in triplewise(melody_notes):
         if (i[0] != 14) and (i[2] != 14) and \
@@ -124,8 +123,24 @@ def chords_fitness(melody_notes):
             acc += 1
     # print(acc/(len(melody_notes)/3))
     return (acc/(len(melody_notes)/3))
-    
 
+
+def beat_fitness(melody_beats):
+    ind = 0
+    sum_beats = 0
+    dist = 0
+    average_beat = 4
+    for i in melody_beats:
+        if ind < 4:
+            sum_beats += i
+        else:
+            dist += abs(sum_beats - average_beat)
+            sum_beats = 0
+            ind = -1
+        ind += 1
+    return dist
+    
+# Adott zenének visszaadja, hány százalékban adott stílusú
 def style_fitness(melodies):
     global labels, model
     style = 'classical'
@@ -147,6 +162,5 @@ def style_fitness(melodies):
 
     label, proc, probs = predict('./generated_music/music_act.wav', model)
     return probs[ii]
-    
 
 

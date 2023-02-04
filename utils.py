@@ -33,12 +33,16 @@ def save_genome_to_midi(melodies):
     time = 0.0
     track = 0
     bpm = 120
-    prog = [0, 40, 60, 69]
+    prog = [0, 8, 40, 24, 60, 69]
     mf.addTrackName(track, time, "Sample Track")
     mf.addTempo(track, time, bpm)
 
+
+
     for ind, melody in enumerate(melodies):
         # print(melody["beat"])
+        # print(melody["notes"])
+
         # print(len(melody["beat"]))
         # print(len(melody["velocity"]))
         channel = ind

@@ -3,19 +3,22 @@ import time
 import random
 from utils import triplewise, save_genome_to_midi, int_from_bits
 from fitness_functions import direction_fitness, stability_fitness, entropy_fitness, style_fitness
-from genetic_functions import genetic_algorithm, genetic_algorithm_accorded, genetic_algorithm_accorded_fully
+from genetic_functions import genetic_algorithm, genetic_algorithm_accorded, genetic_algorithm_accorded_fully, genetic_algorithm_rithmic
 
-KEYS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F",
-        "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]
-SCALES = ["major", "minorM", "dorian", "phrygian",
-          "lydian", "mixolydian", "majorBlues", "minorBlues"]
-BITS_PER_NOTE = 4
+# KEYS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F",
+#         "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]
+
+KEYS = ["C", "D", "E", "F", "G", "A", "B"]
+# SCALES = ["major", "minorM", "dorian", "phrygian",
+#           "lydian", "mixolydian", "majorBlues", "minorBlues"]
+# BITS_PER_NOTE = 4
 
 s = Server()
 s.setOutputDevice(16)
 s.boot()
 
-scl = EventScale(root='C', scale='major', first=4)
+scl = EventScale(root='Eb', scale='major', first=4)
+scales = [EventScale(root=key, scale='major', first=4) for key in KEYS]
 n_notes = 24
 num_notes = 4
 
@@ -43,9 +46,8 @@ def notes_to_chords(melody, notes, beats, scl, instrument_ind):
 
     ## if genetic_algorithm_accorded_fully is used, we get integers, not binary data
     notes_ind = []
-    if instrument_ind == 0:
+    if instrument_ind == 0 or instrument_ind == 1:
         notes_ind = notes
-    
     else:
         notes_ind = [int_from_bits(note)for note in notes]
 
@@ -113,6 +115,10 @@ def notes_to_chords(melody, notes, beats, scl, instrument_ind):
     # print(len(melody["time"]))
 
     steps = []
+    # print(scl)
+    # for i in range(len(scl)):
+    #     print(scl[i])
+
     for step in range(1):
         steps.append([scl[note % len(scl)] for note in melody["notes"]])
 
@@ -122,16 +128,19 @@ def notes_to_chords(melody, notes, beats, scl, instrument_ind):
 
 
 def generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments):
-
     melodies = [{ "notes": [], "velocity": [], "beat": [], "time": [] } for i in range(n_instruments)]
 
     for i in range(n_instruments):
-        if i == 0:
-            best_notes, score, best_beats = genetic_algorithm_accorded_fully(fitness, n_iter, n_pop, r_cross, r_mut)
-            melodies[i] = notes_to_chords(melodies[i], best_notes, best_beats, scl, i)
-        else:
-            best_notes, score, best_beats = genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut)
-            melodies[i] = notes_to_chords(melodies[i], best_notes, best_beats, scl, i)
+        match i:
+            case 0:
+                best_notes, score, best_beats = genetic_algorithm_accorded_fully(fitness, n_iter, n_pop, r_cross, r_mut)
+                melodies[i] = notes_to_chords(melodies[i], best_notes, best_beats, scl, i)
+            case 1:
+                best_notes, score, best_beats = genetic_algorithm_rithmic(fitness, n_iter, n_pop, r_cross, r_mut)
+                melodies[i] = notes_to_chords(melodies[i], best_notes, best_beats, scl, i)
+            case _:
+                best_notes, score, best_beats = genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut)
+                melodies[i] = notes_to_chords(melodies[i], best_notes, best_beats, scl, i)
 
     save_genome_to_midi(melodies)
 
@@ -155,13 +164,11 @@ n_iter = 100
 n_pop = 100
 r_cross = 0.7
 r_mut = 0.05
-n_instruments = 2
+n_instruments = 3
 # events = generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments)
 generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments)
 # listen_to_the_music(events)
 
-# Általánosítani kellene: Hogy melyik hang melyik időben érkezik (adott hangszeren ha egyszerre több hangot (pl akkordot)
-# akarunk játszani; time tömb. Utilsba használni. Általánosítani a módszert n hangszerre, a fitness 
-# függvények tudják ezt kezelni). -> Tehát általánosítani a genetikus algoritmust a fitness függvényekkel együtt 
-# több hangszerre
-
+# Váltani az adott skálák között, Berakni egy dobot, ahhoz igazítani a tempót
+# Több osztályra osztani a hangszereket (mint ahogy rendesen): tempó, akkord, dallam
+# Kitalálni a tempóra fitnesst
