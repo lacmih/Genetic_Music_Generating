@@ -71,8 +71,6 @@ def notes_to_chords(melody, notes, beats, scl, instrument_ind):
     
     # filling up the time array, making the chords play at the same time
     if instrument_ind == 0:
-        # print(melody["beat"])
-        # print(len(melody["beat"]))
         k = 0 # if chord, dont check it for the rest of chord
         for p,i in enumerate(triplewise(melody["notes"])):
             if k == 0: 
@@ -87,8 +85,6 @@ def notes_to_chords(melody, notes, beats, scl, instrument_ind):
                     [melody["time"].append(0.0) for _ in range(2)]
                     melody["time"].append(3.0)
 
-
-                    # print("AKKORD")
                     k = 2 # the rest of the chord is not checked
                 else:
                     melody["time"].append(melody["beat"][p])
@@ -99,25 +95,11 @@ def notes_to_chords(melody, notes, beats, scl, instrument_ind):
             l = len(melody["beat"])
             melody["time"].append(melody["beat"][l - 2])
             melody["time"].append(melody["beat"][l - 1])
-        # melody["beat"] = [beat * 3 for beat in melody["beat"]]
-        # melody["beat"][0] = 1.0
-        # melody["beat"][1] = 2.0
-        # melody["beat"][2] = 3.0
-        # melody["beat"][3] = 1.0
-        # print(melody["beat"])
-        # print(len(melody["beat"]))
-        # print(len(melody["notes"]))
 
     else:
         melody["time"] = melody["beat"]
 
-    # print(melody["time"])
-    # print(len(melody["time"]))
-
     steps = []
-    # print(scl)
-    # for i in range(len(scl)):
-    #     print(scl[i])
 
     for step in range(1):
         steps.append([scl[note % len(scl)] for note in melody["notes"]])
@@ -168,7 +150,3 @@ n_instruments = 3
 # events = generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments)
 generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instruments)
 # listen_to_the_music(events)
-
-# Váltani az adott skálák között, Berakni egy dobot, ahhoz igazítani a tempót
-# Több osztályra osztani a hangszereket (mint ahogy rendesen): tempó, akkord, dallam
-# Kitalálni a tempóra fitnesst

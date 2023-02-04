@@ -40,11 +40,6 @@ def save_genome_to_midi(melodies):
 
 
     for ind, melody in enumerate(melodies):
-        # print(melody["beat"])
-        # print(melody["notes"])
-
-        # print(len(melody["beat"]))
-        # print(len(melody["velocity"]))
         channel = ind
         program = prog[ind] # Selecting instrument
         mf.addProgramChange(track, channel, time, program) # Changing instrument from a fiven time at a given auido channel
