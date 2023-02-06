@@ -1,6 +1,12 @@
 from numpy.random import randint
 from numpy.random import rand
-from fitness_functions import direction_fitness, stability_fitness, entropy_fitness, chords_fitness, beat_fitness
+from fitness_functions import (
+    direction_fitness,
+    stability_fitness,
+    entropy_fitness,
+    chords_fitness,
+    beat_fitness,
+)
 
 from utils import int_from_bits
 from numpy import random
@@ -9,36 +15,45 @@ import numpy as np
 
 # random.seed(1)
 
+
 def random_gene():
     s = [round(rand()) for _ in range(4)]
     return s
 
+
 def random_element(k=100):
     return [random_gene() for _ in range(k)]
 
+
 def random_chord(k=100):
     ch = [0]
-    for i in range(round(k/3)):
+    for i in range(round(k / 3)):
         random = round(rand() * 12)
         ch.append(random)
         ch.append(random + 2)
         ch.append(random + 4)
-    return ch    
+    return ch
+
 
 def random_velocity(k=100):
     return [random.choice([127, 63, 31]) for _ in range(k)]
 
+
 def same_beat(k=100):
     return [random.choice([1]) for _ in range(k)]
 
+
 def random_beat(k=100):
-    return [random.choice([2, 1, 1/2]) for _ in range(k)]
+    return [random.choice([2, 1, 1 / 2]) for _ in range(k)]
+
 
 def random_single_beat():
-    return random.choice([2, 1, 1/2])
+    return random.choice([2, 1, 1 / 2])
+
 
 def random_time(k=100):
     return [random.choice([0, 1]) for _ in range(k)]
+
 
 def mutation(elem, c):
     # iterate over the population and mutate with a chance of c
@@ -49,6 +64,7 @@ def mutation(elem, c):
         elem[pos] = e
     return elem
 
+
 def mutation_beat(elem, c):
     # iterate over the population and mutate with a chance of c
     mute = rand()
@@ -57,6 +73,7 @@ def mutation_beat(elem, c):
         pos = randint(0, len(elem) - 1)
         elem[pos] = e
     return elem
+
 
 def mutation_chord(elem, c):
     # iterate over the population and mutate with a chance of c
@@ -82,11 +99,41 @@ def crossover(parent1, parent2, r_cross):
     return child1, child2
 
 
+def whole_arithmetic_crossover(parent1, parent2, alpha):
+    if len(parent1) != len(parent2):
+        raise ValueError("Parents must be of the same length")
+
+    # ater crosss_point, make genes arithmetic combination of parents
+    child1 = [
+        alpha * parent1[x] + (1 - alpha) * parent2[x] for x in range(len(parent1))
+    ]
+    child2 = [
+        alpha * parent2[x] + (1 - alpha) * parent1[x] for x in range(len(parent1))
+    ]
+
+    return child1, child2
+
+def uniform_crossover(parent1, parent2):
+    if len(parent1) != len(parent2):
+        raise ValueError("Parents must be of the same length")
+    child1 = []
+    child2 = []
+    for i in range(len(parent1)):
+        if rand() > 0.5:
+            child1.append(parent1[i])
+            child2.append(parent2[i])
+        else:
+            child1.append(parent2[i])
+            child2.append(parent1[i])
+    return child1, child2
+
+
+
 # tournament selection
 def selection(pop, scores, k=3):
     # first random selection
     selection_ix = randint(len(pop))
-    for ix in randint(0, len(pop), k-1):
+    for ix in randint(0, len(pop), k - 1):
         # check if better (e.g. perform a tournament)
         if scores[ix] < scores[selection_ix]:
             selection_ix = ix
@@ -100,7 +147,7 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
 
     best, best_eval = 0.0, 0.0
     for gen in range(n_iter):
-        print("Generation number: " + str(gen), end='\r')
+        print("Generation number: " + str(gen), end="\r")
 
         scores = [np.array([fit_func(c) for c in pop_int]) for fit_func in fitness]
         sc = np.zeros(len(pop_int))
@@ -116,20 +163,20 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
         selected = [selection(pop, scores) for _ in range(n_pop)]
         children = list()
         for i in range(0, n_pop, 2):
-            p1, p2 = selected[i], selected[i+1]
+            p1, p2 = selected[i], selected[i + 1]
             for c in crossover(p1, p2, r_cross):
                 mutation(c, r_mut)
                 children.append(c)
-        
+
         pop = children
         pop_int = [[int_from_bits(note) for note in pop_elem] for pop_elem in pop]
-    
-    # Generating the beats 
+
+    # Generating the beats
     beat_pop = [random_beat() for _ in range(n_pop)]
     fitness = [beat_fitness]
     for gen in range(n_iter):
         # print(beat_pop)
-        print("Generation number: " + str(gen), end='\r')
+        print("Generation number: " + str(gen), end="\r")
         scores = [np.array([fit_func(c) for c in beat_pop]) for fit_func in fitness]
         sc = np.zeros(len(beat_pop))
 
@@ -146,26 +193,24 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
         selected = [selection(beat_pop, scores) for _ in range(n_pop)]
         children = list()
         for i in range(0, n_pop, 2):
-            p1, p2 = selected[i], selected[i+1]
+            p1, p2 = selected[i], selected[i + 1]
             for c in crossover(p1, p2, r_cross):
                 mutation_beat(c, r_mut)
                 children.append(c)
-        
+
         beat_pop = children
 
-    
     return [best, best_eval, random_beat()]
 
 
 def genetic_algorithm_accorded(fitness, n_iter, n_pop, r_cross, r_mut):
-
     fitness.append(chords_fitness)
     pop = [random_element() for _ in range(n_pop)]
     pop_int = [[int_from_bits(note) for note in pop_elem] for pop_elem in pop]
     best, best_eval = 0.0, 0.0
 
     for gen in range(n_iter):
-        print("Generation number: " + str(gen), end='\r')
+        print("Generation number: " + str(gen), end="\r")
         scores = [np.array([fit_func(c) for c in pop_int]) for fit_func in fitness]
         sc = np.zeros(len(pop_int))
 
@@ -180,7 +225,7 @@ def genetic_algorithm_accorded(fitness, n_iter, n_pop, r_cross, r_mut):
         selected = [selection(pop, scores) for _ in range(n_pop)]
         children = list()
         for i in range(0, n_pop, 2):
-            p1, p2 = selected[i], selected[i+1]
+            p1, p2 = selected[i], selected[i + 1]
             for c in crossover(p1, p2, r_cross):
                 mutation(c, r_mut)
                 children.append(c)
@@ -188,6 +233,7 @@ def genetic_algorithm_accorded(fitness, n_iter, n_pop, r_cross, r_mut):
         pop = children
         pop_int = [[int_from_bits(note) for note in pop_elem] for pop_elem in pop]
     return [best, best_eval, same_beat()]
+
 
 def genetic_algorithm_accorded_fully(fitness, n_iter, n_pop, r_cross, r_mut):
     fitness.append(chords_fitness)
@@ -197,7 +243,7 @@ def genetic_algorithm_accorded_fully(fitness, n_iter, n_pop, r_cross, r_mut):
     pop = pop_int.copy()
     best, best_eval = 0.0, 0.0
     for gen in range(1):
-        print("Generation number: " + str(gen), end='\r')
+        print("Generation number: " + str(gen), end="\r")
         scores = [np.array([fit_func(c) for c in pop_int]) for fit_func in fitness]
         sc = np.zeros(len(pop_int))
         for i in scores:
@@ -211,7 +257,7 @@ def genetic_algorithm_accorded_fully(fitness, n_iter, n_pop, r_cross, r_mut):
         selected = [selection(pop, scores) for _ in range(n_pop)]
         children = list()
         for i in range(0, n_pop, 2):
-            p1, p2 = selected[i], selected[i+1]
+            p1, p2 = selected[i], selected[i + 1]
             for c in crossover(p1, p2, r_cross):
                 mutation_chord(c, r_mut)
                 children.append(c)
@@ -219,6 +265,7 @@ def genetic_algorithm_accorded_fully(fitness, n_iter, n_pop, r_cross, r_mut):
         pop = children
         pop_int = [random_chord(k) for _ in range(n_pop)]
     return [best, best_eval, same_beat(k)]
+
 
 def genetic_algorithm_rithmic(fitness, n_iter, n_pop, r_cross, r_mut):
     k = 100
@@ -228,7 +275,6 @@ def genetic_algorithm_rithmic(fitness, n_iter, n_pop, r_cross, r_mut):
     return [notes, scores, beat]
 
 
-
 def fitness(elem):
     f = 0
     for note in elem:
@@ -236,10 +282,12 @@ def fitness(elem):
         f += s
     return f
 
+
 def main():
     best, score = genetic_algorithm([entropy_fitness], 2, 100, 0.2, 0.05)
-    print('Done!')
-    print('f(%s) = %f' % (best, score))
+    print("Done!")
+    print("f(%s) = %f" % (best, score))
+
 
 if __name__ == "__main__":
     main()
