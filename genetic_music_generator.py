@@ -17,7 +17,7 @@ s = Server()
 s.setOutputDevice(16)
 s.boot()
 
-scl = EventScale(root='Eb', scale='major', first=4)
+scl = EventScale(root='C', scale='major', first=4)
 scales = [EventScale(root=key, scale='major', first=4) for key in KEYS]
 n_notes = 24
 num_notes = 4
@@ -120,6 +120,7 @@ def generate_music(scl, n_notes, fitness, n_iter, n_pop, r_cross, r_mut, n_instr
             case 1:
                 best_notes, score, best_beats = genetic_algorithm_rithmic(fitness, n_iter, n_pop, r_cross, r_mut)
                 melodies[i] = notes_to_chords(melodies[i], best_notes, best_beats, scl, i)
+                # pass
             case _:
                 best_notes, score, best_beats = genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut)
                 melodies[i] = notes_to_chords(melodies[i], best_notes, best_beats, scl, i)

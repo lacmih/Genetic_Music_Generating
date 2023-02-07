@@ -99,20 +99,6 @@ def crossover(parent1, parent2, r_cross):
     return child1, child2
 
 
-def whole_arithmetic_crossover(parent1, parent2, alpha):
-    if len(parent1) != len(parent2):
-        raise ValueError("Parents must be of the same length")
-
-    # ater crosss_point, make genes arithmetic combination of parents
-    child1 = [
-        alpha * parent1[x] + (1 - alpha) * parent2[x] for x in range(len(parent1))
-    ]
-    child2 = [
-        alpha * parent2[x] + (1 - alpha) * parent1[x] for x in range(len(parent1))
-    ]
-
-    return child1, child2
-
 def uniform_crossover(parent1, parent2):
     if len(parent1) != len(parent2):
         raise ValueError("Parents must be of the same length")
@@ -135,6 +121,16 @@ def selection(pop, scores, k=3):
     selection_ix = randint(len(pop))
     for ix in randint(0, len(pop), k - 1):
         # check if better (e.g. perform a tournament)
+        if scores[ix] > scores[selection_ix]:
+            selection_ix = ix
+    return pop[selection_ix]
+
+
+def selection_beat(pop, scores, k=3):
+    # first random selection
+    selection_ix = randint(len(pop))
+    for ix in randint(0, len(pop), k - 1):
+        # check if better (e.g. perform a tournament)
         if scores[ix] < scores[selection_ix]:
             selection_ix = ix
     return pop[selection_ix]
@@ -144,7 +140,6 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
     pop = [random_element() for _ in range(n_pop)]
 
     pop_int = [[int_from_bits(note) for note in pop_elem] for pop_elem in pop]
-
     best, best_eval = 0.0, 0.0
     for gen in range(n_iter):
         print("Generation number: " + str(gen), end="\r")
@@ -152,7 +147,11 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
         scores = [np.array([fit_func(c) for c in pop_int]) for fit_func in fitness]
         sc = np.zeros(len(pop_int))
 
-        for i in scores:
+        for e,i in enumerate(scores):
+            with open('fitness_n_' + str(e) + '.txt', 'a') as f:
+                for j in i:
+                    print(j, file=f, end=" ")
+                print('', file=f)
             sc += i
         scores = sc
 
@@ -183,14 +182,18 @@ def genetic_algorithm(fitness, n_iter, n_pop, r_cross, r_mut):
         # print(scores)
 
         for i in scores:
+            with open('fitness_beat.txt', 'a') as f:
+                for j in i:
+                    print(j, file=f, end=" ")
+                print('', file=f)
             sc += i
         scores = sc
 
         for i in range(n_pop):
-            if scores[i] > best_eval:
+            if scores[i] < best_eval:
                 best, best_eval = pop[i], scores[i]
 
-        selected = [selection(beat_pop, scores) for _ in range(n_pop)]
+        selected = [selection_beat(beat_pop, scores) for _ in range(n_pop)]
         children = list()
         for i in range(0, n_pop, 2):
             p1, p2 = selected[i], selected[i + 1]
@@ -211,8 +214,10 @@ def genetic_algorithm_accorded(fitness, n_iter, n_pop, r_cross, r_mut):
 
     for gen in range(n_iter):
         print("Generation number: " + str(gen), end="\r")
+
         scores = [np.array([fit_func(c) for c in pop_int]) for fit_func in fitness]
         sc = np.zeros(len(pop_int))
+
 
         for i in scores:
             sc += i
@@ -245,7 +250,11 @@ def genetic_algorithm_accorded_fully(fitness, n_iter, n_pop, r_cross, r_mut):
     for gen in range(1):
         print("Generation number: " + str(gen), end="\r")
         scores = [np.array([fit_func(c) for c in pop_int]) for fit_func in fitness]
+        
+        
         sc = np.zeros(len(pop_int))
+        print(gen)
+
         for i in scores:
             sc += i
         scores = sc

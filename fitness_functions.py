@@ -49,7 +49,7 @@ def random_beat(k=100):
 
 
 # Direction of melody:
-def direction_fitness(melody_notes):
+def direction_fitness(melody_notes): #novekedjen
     # dir = 1 -> up -1 -> down
 
     prev = melody_notes[0]
@@ -78,7 +78,7 @@ def direction_fitness(melody_notes):
     return n_same_dir / len(melody_notes)
 
 # Stability of melody:
-def stability_fitness(melody_notes):
+def stability_fitness(melody_notes): # novelni
     prev = melody_notes[0]
 
     dir = 1
@@ -98,7 +98,7 @@ def stability_fitness(melody_notes):
                 n_change_dir += 1
                 dir = 1
         prev = i
-    return 1 - (n_change_dir / len(melody_notes))
+    return (n_change_dir / len(melody_notes))
 
 def entropy_fitness(melody_notes):
     
@@ -111,7 +111,7 @@ def entropy_fitness(melody_notes):
     l = len(melody_notes)
     probs = [p/l for p in probs]
 
-    return(entropy(probs, base = len(probs)))
+    return (entropy(probs, base = len(probs)))
 
 # Adott hangszerre megnézi, hogy az egymást követően leadott 3-hangok hány százaléka akkord
 def chords_fitness(melody_notes):

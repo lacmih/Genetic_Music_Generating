@@ -23,9 +23,9 @@ def metronome(bpm: int):
     return Sine(freq=freq, mul=amp).mix(2).out()
 
 def save_genome_to_midi(melodies):
-    for melody in melodies:
-        if len(melody["notes"][0]) != len(melody["beat"]) or len(melody["notes"][0]) != len(melody["velocity"]):
-            raise ValueError
+    # for melody in melodies:
+    #     if len(melody["notes"][0]) != len(melody["beat"]) or len(melody["notes"][0]) != len(melody["velocity"]):
+    #         raise ValueError
 
     
     mf = MIDIFile(1)
@@ -34,24 +34,35 @@ def save_genome_to_midi(melodies):
     track = 0
     bpm = 120
     prog = [0, 8, 40, 24, 60, 69]
+    # prog = [0, 8, 64, 24, 60, 69] # Levi
+    # prog = [57, 8, 73, 24, 60, 69] # Ákos
+    # prog = [0, 8, 24, 24, 60, 69] # Mátyás
+    # prog = [0, 8, 0, 24, 60, 69] # Kiki
+    # prog = [88, 125, 101] # ujvilagi alternativ
+    # prog = [101, 38, 36, 122, 120, 121, 123,124,125,126] # menet
+    # prog = [101, 127, 122, 120] # tripp
+
+
+
     mf.addTrackName(track, time, "Sample Track")
     mf.addTempo(track, time, bpm)
 
 
 
     for ind, melody in enumerate(melodies):
-        channel = ind
-        program = prog[ind] # Selecting instrument
-        mf.addProgramChange(track, channel, time, program) # Changing instrument from a fiven time at a given auido channel
-        
-        for i, vel in enumerate(melody["velocity"]):
-            if vel > 0:
-                for step in melody["notes"]:
-                    mf.addNote(track, channel, step[i], time, melody["beat"][i], vel)
+        if ind != 7:
+            channel = ind
+            program = prog[ind] # Selecting instrument
+            mf.addProgramChange(track, channel, time, program) # Changing instrument from a fiven time at a given auido channel
+            
+            for i, vel in enumerate(melody["velocity"]):
+                if vel > 0:
+                    for step in melody["notes"]:
+                        mf.addNote(track, channel, step[i], time, melody["beat"][i], vel)
 
-            time += melody["time"][i]
+                time += melody["time"][i]
 
-        time = 0.0
+            time = 0.0
 
     filename = "./generated_music/music_act.mid"
 
