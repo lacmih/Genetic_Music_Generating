@@ -122,7 +122,7 @@ def chords_fitness(melody_notes):
             (i[2] - i[1] == 2 and i[1] - i[0] == 2)):
             acc += 1
     # print(acc/(len(melody_notes)/3))
-    return (acc/(len(melody_notes)/3))
+    return acc/(len(melody_notes) - 2)
 
 
 def beat_fitness(melody_beats):
